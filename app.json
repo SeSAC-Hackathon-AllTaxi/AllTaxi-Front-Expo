@@ -5,6 +5,44 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "fonts": [
+      {
+        "asset": "assets/fonts/NotoSansKR/NotoSansKR-Black.ttf",
+        "family": "NotoSansKR"
+      },
+      {
+        "asset": "assets/fonts/NotoSansKR/NotoSansKR-Bold.ttf",
+        "family": "NotoSansKR-Bold"
+      },
+      {
+        "asset": "assets/fonts/NotoSansKR/NotoSansKR-ExtraBold.ttf",
+        "family": "NotoSansKR-ExtraBold"
+      },
+      {
+        "asset": "assets/fonts/NotoSansKR/NotoSansKR-ExtraLight.ttf",
+        "family": "NotoSansKR-ExtraLight"
+      },
+      {
+        "asset": "assets/fonts/NotoSansKR/NotoSansKR-Light.ttf",
+        "family": "NotoSansKR-Light"
+      },
+      {
+        "asset": "assets/fonts/NotoSansKR/NotoSansKR-Medium.ttf",
+        "family": "NotoSansKR-Medium"
+      },
+      {
+        "asset": "assets/fonts/NotoSansKR/NotoSansKR-Regular.ttf",
+        "family": "NotoSansKR-Regular"
+      },
+      {
+        "asset": "assets/fonts/NotoSansKR/NotoSansKR-SemiBold.ttf",
+        "family": "NotoSansKR-SemiBold"
+      },
+      {
+        "asset": "assets/fonts/NotoSansKR/NotoSansKR-Thin.ttf",
+        "family": "NotoSansKR-Thin"
+      }
+    ],
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
