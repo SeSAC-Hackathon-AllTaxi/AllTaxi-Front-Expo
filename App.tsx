@@ -8,11 +8,13 @@ import * as SplashScreen from "expo-splash-screen";
 import MapScreen from "screens/MapScreen";
 import DestinationScreen from "screens/DestinationScreen";
 import { useLocationStore } from "./src/state/locationStore";
+import ChatScreen from "screens/ChatScreen";
 
 type RootStackParamList = {
   올택시: undefined;
   Booking: undefined;
-  목적지: undefined;
+  Destination: undefined;
+  Chat: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -41,9 +43,10 @@ export default function App() {
   return (
     <ThemeProvider>
       <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name="목적지" component={DestinationScreen} />
-          {/* <Stack.Screen name="올택시" component={MapScreen} /> */}
+        <Stack.Navigator initialRouteName="올택시">
+          <Stack.Screen name="Destination" component={DestinationScreen} />
+          <Stack.Screen name="올택시" component={HomeScreen} />
+          <Stack.Screen name="Chat" component={ChatScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </ThemeProvider>

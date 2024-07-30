@@ -10,6 +10,7 @@ import axios from "axios";
 import { KAKAO_REST_API_KEY } from "@env";
 import DestinationListItem from "components/destination/DestinationListItem";
 import { useLocationStore } from "state/locationStore";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 interface SelectedPlace {
   id: string;
@@ -26,7 +27,22 @@ interface SelectedPlace {
   distance: string;
 }
 
-const DestinationScreen: React.FC = () => {
+type RootStackParamList = {
+  Home: undefined;
+  Chat: undefined;
+  Destination: undefined;
+};
+
+type DestinationScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "Destination"
+>;
+
+type Props = {
+  navigation: DestinationScreenNavigationProp;
+};
+
+const DestinationScreen = ({ navigation }: Props) => {
   const [results, setResults] = useState<any[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<SelectedPlace | null>(
     null
