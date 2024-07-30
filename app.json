@@ -4,7 +4,6 @@
     "slug": "AllTaxi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "fonts": [
       {
         "asset": "assets/fonts/NotoSansKR/NotoSansKR-Black.ttf",
@@ -50,13 +49,15 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.AllTaxi"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anonymous.AllTaxi"
     },
     "web": {
       "favicon": "./assets/favicon.png"
