@@ -50,7 +50,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.AllTaxi"
+      "bundleIdentifier": "com.anonymous.AllTaxi",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "이 앱은 음성 인식을 위해 마이크에 접근합니다."
+      }
     },
     "android": {
       "adaptiveIcon": {
