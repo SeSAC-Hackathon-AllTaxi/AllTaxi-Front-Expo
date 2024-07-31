@@ -17,8 +17,10 @@ import {
   EvilIcons,
   Ionicons,
   Feather,
+  FontAwesome5,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
+import MapScreen from "screens/MapScreen";
 
 interface DestinationListItemProps {
   place: {
@@ -69,6 +71,7 @@ const DestinationListItem: React.FC<DestinationListItemProps> = ({
 }) => {
   const [address, setAddress] = useState<IAddress | undefined>();
   const { theme, typography } = useTheme();
+  const [openModal, setOpenModal] = useState(false);
   const searchCoord = async () => {
     try {
       const response = await axios.get(
@@ -97,14 +100,23 @@ const DestinationListItem: React.FC<DestinationListItemProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.img}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <Text style={styles.redoIcon}>{`<`}</Text>
+        <Text style={styles.redoIcon} onPress={onBack}>{`<`}</Text>
+        <MapScreen x={place.x} y={place.y} />
+        <TouchableOpacity
+          style={styles.arrowIcon}
+          onPress={() => setOpenModal(true)}
+        >
+          <FontAwesome5
+            name="location-arrow"
+            size={18}
+            color={theme.colors.background}
+          />
         </TouchableOpacity>
       </View>
       <View style={styles.info}>
-        <TouchableOpacity onPress={() => Linking.openURL(place.place_url)}>
-          <Text style={styles.title}>{place.place_name}</Text>
-        </TouchableOpacity>
+        {/* <TouchableOpacity onPress={() => Linking.openURL(place.place_url)}> */}
+        <Text style={styles.title}>{place.place_name}</Text>
+        {/* </TouchableOpacity> */}
         <Text style={styles.infoText}>{place.category_name}</Text>
 
         <Text style={styles.infoText}>
@@ -134,7 +146,7 @@ const DestinationListItem: React.FC<DestinationListItemProps> = ({
           {place.distance}m
         </Text>
       </View>
-      {address && (
+      {address && openModal && (
         <View style={styles.alter}>
           <Text style={styles.alterText}>
             {address[0].road_address.region_1depth_name}{" "}
@@ -158,9 +170,22 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   redoIcon: {
+    position: "absolute",
+    zIndex: 1,
     fontSize: 30,
     color: theme.colors.background,
     marginLeft: 10,
+  },
+  arrowIcon: {
+    position: "absolute",
+    bottom: -20,
+    right: 10,
+    backgroundColor: theme.colors.primary,
+    width: 50,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
   },
   img: {
     flex: 1.5,
