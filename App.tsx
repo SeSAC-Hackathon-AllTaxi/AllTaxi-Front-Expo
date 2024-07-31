@@ -5,7 +5,6 @@ import HomeScreen from "screens/HomeScreen";
 import { ThemeProvider } from "contexts/ThemeContext";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import MapScreen from "screens/MapScreen";
 import DestinationScreen from "screens/DestinationScreen";
 import { useLocationStore } from "./src/state/locationStore";
 import ChatScreen from "screens/ChatScreen";
