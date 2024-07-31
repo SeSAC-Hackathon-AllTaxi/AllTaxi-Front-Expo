@@ -10,12 +10,14 @@ import { useLocationStore } from "./src/state/locationStore";
 import ChatScreen from "screens/ChatScreen";
 import { Text, View, ActivityIndicator, StyleSheet } from "react-native";
 import { theme } from "constants/theme";
+import DestinationDetailScreen from "screens/DestinationDetailScreen";
 
 type RootStackParamList = {
   올택시: undefined;
   Booking: undefined;
   Destination: undefined;
   Chat: undefined;
+  DestinationDetail: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -57,6 +59,10 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator initialRouteName="올택시">
           <Stack.Screen name="Destination" component={DestinationScreen} />
+          <Stack.Screen
+            name="DestinationDetail"
+            component={DestinationDetailScreen}
+          />
           <Stack.Screen name="올택시" component={HomeScreen} />
           <Stack.Screen name="Chat" component={ChatScreen} />
         </Stack.Navigator>

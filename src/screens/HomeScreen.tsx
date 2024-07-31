@@ -8,6 +8,7 @@ import MapScreen from "./MapScreen";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import { GOOGLE_API_KEY } from "@env";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import axios from "axios";
 
 type RootStackParamList = {
   Home: undefined;
@@ -30,10 +31,29 @@ export default function HomeScreen({ navigation }: Props) {
   const searchInputRef = useRef<GooglePlacesAutocomplete>(null);
 
   const handlePlaceSelect = (data: any, details: any) => {
-    // console.log("data ", data);
-    // console.log("test", data.terms[0].value);
+    // 1) kakao map api를 사용하여 목적지 상세 페이지 구현
+    // navigation.navigate("Destination", { destination: data.terms[0].value });
 
-    navigation.navigate("Destination", { destination: data.terms[0].value });
+    // 2) google map api를 사용하여 목적지 상세 페이지 구현
+    if (details) {
+      const apiRes = axios
+        .get("https://maps.googleapis.com/maps/api/place/photo", {
+          params: {
+            photoreference: details.photos[0].photo_reference,
+            maxwidth: 400,
+            key: GOOGLE_API_KEY,
+          },
+          responseType: "arraybuffer",
+        })
+        .then((res) => {
+          navigation.navigate("DestinationDetail", {
+            data: data,
+            details: details,
+            img: res.request.responseURL,
+          });
+        });
+    }
+
     // 검색창 초기화
     searchInputRef.current?.setAddressText("");
     setOpenSearchBar(false);
