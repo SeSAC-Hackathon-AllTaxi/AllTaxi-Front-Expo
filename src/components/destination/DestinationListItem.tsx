@@ -151,7 +151,7 @@ const DestinationListItem: React.FC<DestinationListItemProps> = ({
           <Text style={styles.alterText}>
             {address[0].road_address.region_1depth_name}{" "}
             {address[0].road_address.region_2depth_name}에 있는 {`\n`}
-            {address[0].road_address.building_name}으로 갈까요?
+            {address[0].road_address.building_name}(으)로 갈까요?
           </Text>
           <TouchableWithoutFeedback>
             <View style={styles.button}>
