@@ -36,3 +36,6 @@ yarn-error.*
 
 # env
 .env
+
+# google SST API Key
+alltaxi-430006-88fa724d381e.json
