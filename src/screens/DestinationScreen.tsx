@@ -11,6 +11,7 @@ import { KAKAO_REST_API_KEY } from "@env";
 import DestinationListItem from "components/destination/DestinationListItem";
 import { useLocationStore } from "state/locationStore";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp } from "@react-navigation/native";
 
 interface SelectedPlace {
   id: string;
@@ -30,7 +31,7 @@ interface SelectedPlace {
 type RootStackParamList = {
   Home: undefined;
   Chat: undefined;
-  Destination: undefined;
+  Destination: { destination: string } | undefined;
 };
 
 type DestinationScreenNavigationProp = StackNavigationProp<
@@ -38,15 +39,19 @@ type DestinationScreenNavigationProp = StackNavigationProp<
   "Destination"
 >;
 
+type DestinationScreenRouteProp = RouteProp<RootStackParamList, "Destination">;
+
 type Props = {
   navigation: DestinationScreenNavigationProp;
+  route: DestinationScreenRouteProp;
 };
 
-const DestinationScreen = ({ navigation }: Props) => {
+const DestinationScreen = ({ navigation, route }: Props) => {
   const [results, setResults] = useState<any[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<SelectedPlace | null>(
     null
   );
+  const destination = route.params?.destination;
 
   const searchPlaces = async () => {
     try {
@@ -59,7 +64,7 @@ const DestinationScreen = ({ navigation }: Props) => {
             Authorization: `KakaoAK ${KAKAO_REST_API_KEY}`,
           },
           params: {
-            query: "세종문화회관", // 음성 || 검색으로 전달받은 장소 키워드
+            query: destination, // 음성 || 검색으로 전달받은 장소 키워드
             x: location?.coords.longitude,
             y: location?.coords.latitude,
             size: 15, // 결과 수 제한 최대 15
@@ -74,7 +79,7 @@ const DestinationScreen = ({ navigation }: Props) => {
 
   useEffect(() => {
     searchPlaces();
-  }, []);
+  }, [destination]);
 
   const handlePlaceSelect = (place: SelectedPlace) => {
     setSelectedPlace(place);
