@@ -1,9 +1,21 @@
 {
   "expo": {
+    "sdkVersion": "51.0.22",
     "name": "AllTaxi",
     "slug": "AllTaxi",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "alltaxi",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
     "fonts": [
       {
         "asset": "assets/fonts/NotoSansKR/NotoSansKR-Black.ttf",
@@ -43,27 +55,39 @@
       }
     ],
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
+
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.AllTaxi",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "이 앱은 음성 인식을 위해 마이크에 접근합니다."
+        "NSMicrophoneUsageDescription": "이 앱은 음성 인식을 위해 마이크에 접근합니다.",
+        "NSCameraUsageDescription": "이 앱은 사진 촬영을 위해 카메라에 접근합니다.",
+        "NSPhotoLibraryUsageDescription": "이 앱은 사진 선택을 위해 사진 라이브러리에 접근합니다."
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FFFFFF"
       },
-      "package": "com.anonymous.AllTaxi"
+      "package": "com.anonymous.AllTaxi",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "web": {},
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "올택시가 카메라에 접근하도록 허용하시겠습니까?"
+        }
+      ],
+      "expo-location",
+      "expo-dev-client"
+    ]
   }
 }

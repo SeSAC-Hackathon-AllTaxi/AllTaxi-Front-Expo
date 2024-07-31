@@ -13,7 +13,8 @@
     "target": "esnext",
     "jsx": "react",
     "module": "esnext",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["expo-camera"]
   },
   "exclude": ["node_modules"]
 }
