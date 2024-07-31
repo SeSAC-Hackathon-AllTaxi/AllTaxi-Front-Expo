@@ -81,31 +81,38 @@ const DestinationDetailScreen = ({ navigation, route }: Props) => {
     return null; // 현재 요일에 대한 운영 시간이 없을 경우
   };
 
-  const operatingHours = getOperatingHours(details.opening_hours.weekday_text);
+  const operatingHours =
+    details.opening_hours &&
+    getOperatingHours(details.opening_hours.weekday_text);
 
   return (
     <View style={styles.container}>
       <View style={styles.imgContainer}>
         <Image source={{ uri: img }} style={styles.image} />
-        {details.current_opening_hours.open_now ? (
-          <View style={styles.openingHour}>
-            <Text style={styles.openingHourText}>
-              <FontAwesome
-                name="circle"
-                size={24}
-                color={theme.colors.primary}
-              />{" "}
-              현재 운영중
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.openingHour}>
-            <Text style={styles.openingHourText}>
-              <FontAwesome name="circle" size={24} color={theme.colors.error} />{" "}
-              운영 종료
-            </Text>
-          </View>
-        )}
+        {details.current_opening_hours &&
+          (details.current_opening_hours.open_now ? (
+            <View style={styles.openingHour}>
+              <Text style={styles.openingHourText}>
+                <FontAwesome
+                  name="circle"
+                  size={24}
+                  color={theme.colors.primary}
+                />{" "}
+                현재 운영중
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.openingHour}>
+              <Text style={styles.openingHourText}>
+                <FontAwesome
+                  name="circle"
+                  size={24}
+                  color={theme.colors.error}
+                />{" "}
+                운영 종료
+              </Text>
+            </View>
+          ))}
         <TouchableOpacity
           style={styles.arrowIcon}
           onPress={() => setOpenModal(true)}
