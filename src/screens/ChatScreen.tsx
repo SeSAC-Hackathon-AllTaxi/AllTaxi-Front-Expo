@@ -2,18 +2,18 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
-  TouchableWithoutFeedback,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import io from "socket.io-client";
-import { VOICE_CHAT_URL } from "@env";
+import { Audio } from "expo-av";
+import * as FileSystem from "expo-file-system";
+import { GOOGLE_SPEECH_TO_TEXT_API_KEY, VOICE_CHAT_URL } from "@env";
+import { AUDIO_HIGH_QUALITY } from "constants/audio";
 
 interface Message {
   type: "user" | "bot";
@@ -34,12 +34,12 @@ type Props = {
 
 const ChatScreen = ({ navigation }: Props) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputText, setInputText] = useState("");
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const socketRef = useRef<any>(null);
+  const recordingRef = useRef<Audio.Recording | null>(null);
 
   useEffect(() => {
-    // 소켓 연결
     socketRef.current = io(VOICE_CHAT_URL);
 
     socketRef.current.on("connect", () => {
@@ -52,7 +52,7 @@ const ChatScreen = ({ navigation }: Props) => {
         addMessage("bot", data.message);
         if (data.destination) {
           console.log("Destination:", data.destination);
-          navigation.navigate("Destination");
+          navigation.navigate("Destination", { destination: data.destination });
         }
       }
     );
@@ -68,65 +68,123 @@ const ChatScreen = ({ navigation }: Props) => {
     setMessages((prev) => [...prev, { type, text }]);
   };
 
-  const handleSend = () => {
-    if (inputText.trim() === "") return;
-    addMessage("user", inputText);
-    // 서버로 메시지 전송
-    socketRef.current?.emit("message", { message: inputText });
-    setInputText("");
+  const startRecording = async () => {
+    try {
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission to access microphone is required!");
+        return;
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        AUDIO_HIGH_QUALITY
+      );
+
+      recordingRef.current = recording;
+      setRecording(recording);
+    } catch (err) {
+      console.error("Failed to start recording", err);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      if (!recordingRef.current) return;
+
+      await recordingRef.current.stopAndUnloadAsync();
+      const uri = recordingRef.current.getURI();
+      console.log("Recording stopped and stored at", uri);
+
+      // Clear the recording reference and state
+      recordingRef.current = null;
+      setRecording(null);
+
+      const file = await FileSystem.readAsStringAsync(uri!, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const API_KEY = GOOGLE_SPEECH_TO_TEXT_API_KEY;
+      const response = await fetch(
+        `https://speech.googleapis.com/v1/speech:recognize?key=${API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            config: {
+              encoding: "LINEAR16",
+              sampleRateHertz: 44100,
+              languageCode: "ko-KR",
+            },
+            audio: {
+              content: file,
+            },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const transcript = data.results[0]?.alternatives[0]?.transcript || "";
+      console.log("Transcription:", transcript);
+      if (transcript) {
+        addMessage("user", transcript);
+        socketRef.current?.emit("message", { message: transcript });
+      }
+    } catch (err: unknown) {
+      const error = err as Error;
+      console.error("Failed to stop recording", error);
+      Alert.alert("Failed to process audio", error.message);
+    }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} // iOS에서 상단 네비게이션 바 높이를 고려
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.inner}>
-          <ScrollView
-            ref={scrollViewRef}
-            style={styles.messagesContainer}
-            contentContainerStyle={styles.messagesContent}
-            onContentSizeChange={() =>
-              scrollViewRef.current?.scrollToEnd({ animated: true })
-            }
+    <View style={styles.container}>
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.messagesContainer}
+        contentContainerStyle={styles.messagesContent}
+        onContentSizeChange={() =>
+          scrollViewRef.current?.scrollToEnd({ animated: true })
+        }
+      >
+        {messages.map((msg, index) => (
+          <View
+            key={index}
+            style={msg.type === "user" ? styles.userMessage : styles.botMessage}
           >
-            {messages.map((msg, index) => (
-              <View
-                key={index}
-                style={
-                  msg.type === "user" ? styles.userMessage : styles.botMessage
-                }
-              >
-                <Text>{msg.text}</Text>
-              </View>
-            ))}
-          </ScrollView>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              value={inputText}
-              onChangeText={setInputText}
-              placeholder="메시지를 입력하세요"
-            />
-            <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
-              <Text style={styles.sendButtonText}>전송</Text>
-            </TouchableOpacity>
+            <Text>{msg.text}</Text>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+        ))}
+      </ScrollView>
+      <View style={styles.inputContainer}>
+        <TouchableOpacity
+          style={[styles.voiceButton, recording && styles.recordingButton]}
+          onPress={recording ? stopRecording : startRecording}
+        >
+          <Text style={styles.voiceButtonText}>
+            {recording ? "Recording..." : "Hold to Speak"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {recording && <ActivityIndicator size="large" color="#0000ff" />}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  inner: {
-    flex: 1,
-    justifyContent: "flex-end",
+    backgroundColor: "#f4f4f4",
   },
   messagesContainer: {
     flex: 1,
@@ -153,28 +211,21 @@ const styles = StyleSheet.create({
     maxWidth: "70%",
   },
   inputContainer: {
-    flexDirection: "row",
     padding: 10,
     backgroundColor: "#fff",
     borderTopWidth: 1,
     borderTopColor: "#ddd",
   },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 20,
-    padding: 10,
-    marginRight: 10,
-  },
-  sendButton: {
+  voiceButton: {
     backgroundColor: "#007bff",
-    padding: 10,
-    borderRadius: 20,
-    justifyContent: "center",
+    padding: 15,
+    borderRadius: 25,
     alignItems: "center",
   },
-  sendButtonText: {
+  recordingButton: {
+    backgroundColor: "#dc3545",
+  },
+  voiceButtonText: {
     color: "#fff",
     fontWeight: "bold",
   },
