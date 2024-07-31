@@ -3,8 +3,8 @@ import { theme } from "./theme";
 
 export const typography = {
   header: {
-    fontFamily: theme.fonts.NotoSansKR.bold,
-    fontSize: 24,
+    fontFamily: theme.fonts.NotoSansKR.extraBold,
+    fontSize: 22,
     lineHeight: 32,
   } as TextStyle,
   body: {
