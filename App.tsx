@@ -11,13 +11,17 @@ import ChatScreen from "screens/ChatScreen";
 import { Text, View, ActivityIndicator, StyleSheet } from "react-native";
 import { theme } from "constants/theme";
 import DestinationDetailScreen from "screens/DestinationDetailScreen";
+import MyLocationScreen from "screens/MyLocationScreen";
+import CameraScreen from "screens/CameraScreen";
 
-type RootStackParamList = {
+export type RootStackParamList = {
   올택시: undefined;
   Booking: undefined;
   Destination: undefined;
   Chat: undefined;
   DestinationDetail: undefined;
+  MyLocation: undefined;
+  Camera: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -65,6 +69,8 @@ export default function App() {
           />
           <Stack.Screen name="올택시" component={HomeScreen} />
           <Stack.Screen name="Chat" component={ChatScreen} />
+          <Stack.Screen name="MyLocation" component={MyLocationScreen} />
+          <Stack.Screen name="Camera" component={CameraScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </ThemeProvider>

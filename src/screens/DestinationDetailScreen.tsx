@@ -27,6 +27,7 @@ interface DestinationDetailScreenProps {
 type RootStackParamList = {
   Home: undefined;
   Chat: undefined;
+  MyLocation: undefined;
   Destination: { destination: string } | undefined;
   DestinationDetail: DestinationDetailScreenProps;
 };
@@ -157,7 +158,9 @@ const DestinationDetailScreen = ({ navigation, route }: Props) => {
           <Text style={styles.alterText}>
             {data.terms[0].value}(으)로 갈까요?
           </Text>
-          <TouchableWithoutFeedback>
+          <TouchableWithoutFeedback
+            onPress={() => navigation.navigate("MyLocation")}
+          >
             <View style={styles.button}>
               <Text style={styles.buttonText}>도착지 설정</Text>
             </View>
