@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useTheme } from "contexts/ThemeContext";
@@ -6,10 +6,13 @@ import { theme } from "constants/theme";
 import MapView from "react-native-maps";
 import MapScreen from "./MapScreen";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
+import { GOOGLE_API_KEY } from "@env";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
 type RootStackParamList = {
   Home: undefined;
   Chat: undefined;
+  Destination: undefined;
 };
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, "Home">;
@@ -23,20 +26,56 @@ export default function HomeScreen({ navigation }: Props) {
   const moveChatScreen = () => {
     navigation.navigate("Chat");
   };
+  const [openSearchBar, setOpenSearchBar] = useState(false);
+  const searchInputRef = useRef<GooglePlacesAutocomplete>(null);
+
+  const handlePlaceSelect = (data: any, details: any) => {
+    // console.log("data ", data);
+    // console.log("test", data.terms[0].value);
+
+    navigation.navigate("Destination", { destination: data.terms[0].value });
+    // 검색창 초기화
+    searchInputRef.current?.setAddressText("");
+    setOpenSearchBar(false);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.map}>
         <MapScreen />
       </View>
-      <View style={styles.info}>
-        <Text style={styles.infoText}>
-          <AntDesign name="sound" size={24} color="black" />
-          안녕하세요,
-        </Text>
-        <Text style={[typography.header]}>어디로 가고 싶으세요?</Text>
-      </View>
+      {!openSearchBar && (
+        <View style={styles.info}>
+          <Text style={styles.infoText}>
+            <AntDesign name="sound" size={24} color="black" />
+            안녕하세요,
+          </Text>
+          <Text style={[typography.header]}>어디로 가고 싶으세요?</Text>
+        </View>
+      )}
+      {openSearchBar && (
+        <View style={styles.inputContainer}>
+          <GooglePlacesAutocomplete
+            ref={searchInputRef}
+            minLength={2}
+            placeholder="장소를 검색해보세요!"
+            query={{
+              key: GOOGLE_API_KEY,
+              language: "ko",
+              components: "country:kr",
+            }}
+            keyboardShouldPersistTaps={"handled"}
+            fetchDetails={true}
+            onPress={handlePlaceSelect}
+            onFail={(error) => console.log(error)}
+            onNotFound={() => console.log("no results")}
+            keepResultsAfterBlur={true}
+            enablePoweredByContainer={false}
+          />
+        </View>
+      )}
       <View style={styles.option}>
-        <TouchableOpacity onPress={() => console.log("click search")}>
+        <TouchableOpacity onPress={() => setOpenSearchBar(true)}>
           <Text style={[typography.header, styles.optionText]}>
             <AntDesign
               name="search1"
@@ -68,6 +107,16 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
     backgroundColor: "black",
+  },
+  inputContainer: {
+    zIndex: 1,
+    position: "absolute",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    margin: 10,
+    padding: 10,
+    borderRadius: 5,
   },
   info: {
     position: "absolute",
