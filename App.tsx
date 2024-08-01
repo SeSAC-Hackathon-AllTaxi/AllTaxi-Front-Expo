@@ -13,6 +13,7 @@ import { theme } from "constants/theme";
 import DestinationDetailScreen from "screens/DestinationDetailScreen";
 import MyLocationScreen from "screens/MyLocationScreen";
 import CameraScreen from "screens/CameraScreen";
+import InitLoadingScreen from "screens/InitLoadingScreen";
 
 export type RootStackParamList = {
   올택시: undefined;
@@ -50,18 +51,16 @@ export default function App() {
   }, []);
 
   if (!fontsLoaded || !isLocationLoaded) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.colors.text.secondary} />
-        <Text style={styles.loadingText}>로딩 중...</Text>
-      </View>
-    );
+    return <InitLoadingScreen />;
   }
 
   return (
     <ThemeProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="올택시">
+        <Stack.Navigator
+          screenOptions={{ headerShown: false }}
+          initialRouteName="올택시"
+        >
           <Stack.Screen name="Destination" component={DestinationScreen} />
           <Stack.Screen
             name="DestinationDetail"
