@@ -5,6 +5,7 @@ import { View, StyleSheet } from "react-native";
 import axios from "axios";
 import { useLocationStore } from "state/locationStore";
 import { NAVER_API_KEY, NAVER_API_KEY_ID } from "@env";
+import { theme } from "constants/theme";
 
 interface MapScreenProps {
   x?: string;
@@ -28,10 +29,6 @@ const MapScreen: React.FC<MapScreenProps> = ({ x, y }) => {
     longitude: Number(x) || 0,
   });
 
-  const [route, setRoute] = useState<
-    { latitude: number; longitude: number }[] | null
-  >(null);
-
   useEffect(() => {
     if (x && y) {
       setDestination({
@@ -47,8 +44,6 @@ const MapScreen: React.FC<MapScreenProps> = ({ x, y }) => {
       const url =
         "https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving";
       const params = {
-        // start: "127.1058342,37.359708",
-        // goal: "129.075986,35.179470",
         start: `${origin.longitude},${origin.latitude}`,
         goal: `${destination.longitude},${destination.latitude}`,
         option: "trafast",
@@ -134,17 +129,10 @@ const MapScreen: React.FC<MapScreenProps> = ({ x, y }) => {
               pinColor="red"
             />
           )}
-        {/* {route && (
-          <Polyline
-            coordinates={routeCoordinates}
-            strokeWidth={5}
-            strokeColor="red"
-          />
-        )} */}
         <Polyline
           coordinates={routeCoordinates}
           strokeWidth={5}
-          strokeColor="red"
+          strokeColor={theme.colors.primary}
         />
       </MapView>
     </View>
