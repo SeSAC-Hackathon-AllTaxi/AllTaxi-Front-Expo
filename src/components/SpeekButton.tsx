@@ -6,7 +6,7 @@ import { theme } from "constants/theme";
 import { typography } from "constants/typography";
 import { Entypo, FontAwesome5 } from "@expo/vector-icons";
 
-const SpeakButton = () => {
+const SpeakButton = ({ onPress }: any) => {
   const [isAnimating, setIsAnimating] = useState(false);
 
   const toggleAnimation = () => {
@@ -14,7 +14,7 @@ const SpeakButton = () => {
   };
 
   return (
-    <TouchableOpacity onPress={toggleAnimation} style={styles.container}>
+    <TouchableOpacity onPress={onPress} style={styles.container}>
       <View style={styles.option}>
         <MicAnimation
           size={200}

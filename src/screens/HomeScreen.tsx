@@ -22,7 +22,8 @@ type Props = {
 export default function HomeScreen({ navigation }: Props) {
   const { typography } = useTheme();
   const moveChatScreen = () => {
-    navigation.navigate("Chat");
+    // navigation.navigate("Chat");
+    navigation.navigate("Destination", { destination: "세종문화회관" });
   };
 
   return (
@@ -38,9 +39,7 @@ export default function HomeScreen({ navigation }: Props) {
           어디로 갈까요?
         </Text>
       </View>
-      <TouchableOpacity onPress={moveChatScreen}>
-        <SpeakButton />
-      </TouchableOpacity>
+      <SpeakButton onPress={moveChatScreen}></SpeakButton>
     </View>
   );
 }

@@ -7,13 +7,11 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import DestinationScreen from "screens/DestinationScreen";
 import { useLocationStore } from "./src/state/locationStore";
-import ChatScreen from "screens/ChatScreen";
-import { Text, View, ActivityIndicator, StyleSheet } from "react-native";
-import { theme } from "constants/theme";
 import DestinationDetailScreen from "screens/DestinationDetailScreen";
 import MyLocationScreen from "screens/MyLocationScreen";
 import CameraScreen from "screens/CameraScreen";
 import InitLoadingScreen from "screens/InitLoadingScreen";
+import ChatScreenTest from "screens/ChatScreenTest";
 
 export type RootStackParamList = {
   올택시: undefined;
@@ -67,7 +65,7 @@ export default function App() {
             component={DestinationDetailScreen}
           />
           <Stack.Screen name="올택시" component={HomeScreen} />
-          <Stack.Screen name="Chat" component={ChatScreen} />
+          <Stack.Screen name="Chat" component={ChatScreenTest} />
           <Stack.Screen name="MyLocation" component={MyLocationScreen} />
           <Stack.Screen name="Camera" component={CameraScreen} />
         </Stack.Navigator>
@@ -75,15 +73,3 @@ export default function App() {
     </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 18,
-  },
-});
