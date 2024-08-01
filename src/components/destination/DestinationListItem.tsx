@@ -1,26 +1,22 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  Linking,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { KAKAO_REST_API_KEY } from "@env";
 import { theme } from "constants/theme";
 import { useTheme } from "contexts/ThemeContext";
-import {
-  FontAwesome,
-  Entypo,
-  EvilIcons,
-  Ionicons,
-  Feather,
-  FontAwesome5,
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
+import { FontAwesome, Ionicons, AntDesign } from "@expo/vector-icons";
 import MapScreen from "screens/MapScreen";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useNavigation } from "@react-navigation/native";
+import { calculateTaxiFare } from "utils/calculateTaxiFare";
+
+type RootStackParamList = {
+  Home: undefined;
+  Chat: undefined;
+  MyLocation: undefined;
+  Destination: { destination: string } | undefined;
+  DestinationDetail: { place: Object; onBack: () => void };
+};
 
 interface DestinationListItemProps {
   place: {
@@ -69,6 +65,8 @@ const DestinationListItem: React.FC<DestinationListItemProps> = ({
   place,
   onBack,
 }) => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
   const [address, setAddress] = useState<IAddress | undefined>();
   const { theme, typography } = useTheme();
   const [openModal, setOpenModal] = useState(false);
@@ -97,69 +95,72 @@ const DestinationListItem: React.FC<DestinationListItemProps> = ({
     searchCoord();
   }, []);
 
+  const distanceInMeters = Number(place.distance);
+  const isNightTime = false; // 주간 시간대
+  const result = calculateTaxiFare(distanceInMeters, isNightTime);
+
   return (
     <View style={styles.container}>
+      <View
+        style={{
+          paddingTop: 80,
+          flex: 0.4,
+          backgroundColor: theme.colors.background,
+          paddingVertical: 10,
+          paddingHorizontal: 20,
+          borderBottomEndRadius: 30,
+          borderBottomStartRadius: 30,
+          zIndex: 1,
+          display: "flex",
+          flexDirection: "row",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+        }}
+      >
+        <AntDesign name="sound" size={32} color="black" />
+        <Text style={[typography.header, { marginLeft: 5 }]}>
+          <Text style={{ color: theme.colors.primary, fontWeight: 600 }}>
+            {place.place_name}
+          </Text>
+          (으)로 가겠습니다.
+        </Text>
+      </View>
       <View style={styles.img}>
-        <Text style={styles.redoIcon} onPress={onBack}>{`<`}</Text>
         <MapScreen x={place.x} y={place.y} />
-        <TouchableOpacity
-          style={styles.arrowIcon}
-          onPress={() => setOpenModal(true)}
-        >
-          <FontAwesome5
-            name="location-arrow"
-            size={18}
-            color={theme.colors.background}
-          />
-        </TouchableOpacity>
       </View>
       <View style={styles.info}>
-        {/* <TouchableOpacity onPress={() => Linking.openURL(place.place_url)}> */}
-        <Text style={styles.title}>{place.place_name}</Text>
-        {/* </TouchableOpacity> */}
-        <Text style={styles.infoText}>{place.category_name}</Text>
-
         <Text style={styles.infoText}>
           <Ionicons
             name="location-sharp"
-            size={18}
+            size={23}
             color={theme.colors.text.secondary}
           />
           {place.address_name}
         </Text>
-        {place.phone && (
-          <Text style={styles.infoText}>
-            <FontAwesome
-              name="phone"
-              size={16}
-              color={theme.colors.text.secondary}
-            />
-            {place.phone}
-          </Text>
-        )}
-        <Text style={styles.infoText}>
-          <MaterialCommunityIcons
-            name="map-marker-distance"
-            size={20}
-            color={theme.colors.text.secondary}
-          />
-          {place.distance}m
+        <Text style={styles.title}>
+          {place.place_name} {"\n"}
+          소요 시간: {result.estimatedTime}분 {"\n"}
+          예상 금액: {result.fare}원
         </Text>
       </View>
-      {address && openModal && (
-        <View style={styles.alter}>
-          <Text style={styles.alterText}>
-            {address[0].address.region_1depth_name}{" "}
-            {address[0].address.region_2depth_name}에 있는 {`\n`}
-            {place.place_name}(으)로 갈까요?
-          </Text>
-          <TouchableWithoutFeedback>
-            <View style={styles.button}>
-              <Text style={styles.buttonText}>도착지 설정</Text>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      )}
+
+      <View style={styles.alter}>
+        <TouchableWithoutFeedback
+          onPress={() => navigation.navigate("MyLocation")}
+        >
+          <View style={styles.button}>
+            <Text style={styles.buttonText}>여기로 출발</Text>
+          </View>
+        </TouchableWithoutFeedback>
+
+        <TouchableWithoutFeedback onPress={onBack}>
+          <View style={styles.button}>
+            <Text style={styles.buttonText}>다른 장소로</Text>
+          </View>
+        </TouchableWithoutFeedback>
+      </View>
     </View>
   );
 };
@@ -170,6 +171,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   redoIcon: {
+    marginTop: 50,
     position: "absolute",
     zIndex: 1,
     fontSize: 30,
@@ -188,7 +190,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   img: {
-    flex: 1.5,
+    flex: 1.3,
     backgroundColor: theme.colors.text.secondary,
   },
   info: {
@@ -197,39 +199,43 @@ const styles = StyleSheet.create({
   },
   infoText: {
     color: theme.colors.text.secondary,
-    marginVertical: 2,
+    fontSize: 23,
   },
   backButton: {
     marginBottom: 20,
   },
   title: {
-    fontSize: 30,
+    fontSize: 27,
     marginTop: 15,
     marginBottom: 5,
+    fontFamily: theme.fonts.NotoSansKR.bold,
   },
   alter: {
-    flex: 0.7,
-    backgroundColor: theme.colors.primary,
+    flex: 0.5,
+    backgroundColor: theme.colors.background,
     padding: 10,
-    justifyContent: "center",
+    display: "flex",
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-around",
   },
   alterText: {
     padding: 10,
-    fontSize: 22,
+    fontSize: 25,
     fontFamily: theme.fonts.NotoSansKR.thin,
-    color: theme.colors.background,
+    color: theme.colors.primary,
     marginBottom: 10,
   },
   button: {
-    backgroundColor: theme.colors.background,
-    borderRadius: 10,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 30,
     padding: 10,
-    display: "flex",
     marginBottom: 10,
+    height: 80,
   },
   buttonText: {
-    color: theme.colors.primary,
-    fontSize: 23,
+    color: theme.colors.background,
+    fontSize: 30,
     margin: "auto",
     borderRadius: 10,
     fontFamily: theme.fonts.NotoSansKR.bold,
