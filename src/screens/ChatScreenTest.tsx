@@ -11,6 +11,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import io from "socket.io-client";
 import { Audio } from "expo-av";
 import * as FileSystem from "expo-file-system";
+import * as Speech from "expo-speech";
 import { GOOGLE_SPEECH_TO_TEXT_API_KEY, VOICE_CHAT_URL } from "@env";
 import { AUDIO_HIGH_QUALITY } from "constants/audio";
 import { AntDesign } from "@expo/vector-icons";
@@ -31,7 +32,7 @@ type Props = {
 };
 
 const ChatScreenTest = ({ navigation }: Props) => {
-  const [serverMessage, setServerMessage] = useState("지금 말씀하세요.");
+  const [serverMessage, setServerMessage] = useState("");
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [destination, setDestination] = useState("");
   const [userScript, setUserScript] = useState("");
@@ -50,9 +51,12 @@ const ChatScreenTest = ({ navigation }: Props) => {
       "response",
       (data: { message: string; destination: string }) => {
         setServerMessage(data.message);
+        Speech.speak(data.message); // Speak the server message
         if (data.destination) {
           setDestination(data.destination);
-          navigation.navigate("Destination", { destination: data.destination });
+          navigation.navigate("Destination", {
+            destination: data.destination,
+          });
         }
       }
     );
@@ -175,7 +179,7 @@ const ChatScreenTest = ({ navigation }: Props) => {
     <View style={styles.container}>
       <View style={styles.info}>
         <AntDesign name="sound" size={32} color="black" />
-        <Text style={[typography.header, { marginLeft: 5 }]}>
+        <Text style={[typography.header, { marginLeft: 5, marginRight: 15 }]}>
           {serverMessage}
         </Text>
       </View>
@@ -282,7 +286,7 @@ const styles = StyleSheet.create({
   text: {
     color: theme.colors.background,
     marginTop: 5,
-    fontWeight: 600,
+    fontWeight: "600",
   },
 });
 
