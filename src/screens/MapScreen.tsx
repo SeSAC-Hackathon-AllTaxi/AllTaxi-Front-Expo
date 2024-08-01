@@ -1,64 +1,33 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
+import polyline from "@mapbox/polyline";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet } from "react-native";
 import axios from "axios";
 import { useLocationStore } from "state/locationStore";
-import { GOOGLE_MAPS_iOS_API_KEY } from "@env";
-
-// 폴리라인 디코딩 함수
-function decodePolyline(
-  encoded: string
-): { latitude: number; longitude: number }[] {
-  const poly = [];
-  let index = 0,
-    len = encoded.length;
-  let lat = 0,
-    lng = 0;
-
-  while (index < len) {
-    let b,
-      shift = 0,
-      result = 0;
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    const dlat = result & 1 ? ~(result >> 1) : result >> 1;
-    lat += dlat;
-
-    shift = 0;
-    result = 0;
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    const dlng = result & 1 ? ~(result >> 1) : result >> 1;
-    lng += dlng;
-
-    poly.push({ latitude: lat / 1e5, longitude: lng / 1e5 });
-  }
-
-  return poly;
-}
+import { NAVER_API_KEY, NAVER_API_KEY_ID } from "@env";
 
 interface MapScreenProps {
   x?: string;
   y?: string;
 }
 
+interface Coordinate {
+  latitude: number;
+  longitude: number;
+}
+
 const MapScreen: React.FC<MapScreenProps> = ({ x, y }) => {
   const location = useLocationStore.getState().location;
-  const [origin, setOrigin] = useState({
+  const [routeCoordinates, setRouteCoordinates] = useState<Coordinate[]>([]);
+  const [origin, setOrigin] = useState<Coordinate>({
     latitude: location?.coords?.latitude ?? 37.5665,
     longitude: location?.coords?.longitude ?? 126.978,
   });
-
-  const [destination, setDestination] = useState({
+  const [destination, setDestination] = useState<Coordinate>({
     latitude: Number(y) || 0,
     longitude: Number(x) || 0,
   });
+
   const [route, setRoute] = useState<
     { latitude: number; longitude: number }[] | null
   >(null);
@@ -75,35 +44,42 @@ const MapScreen: React.FC<MapScreenProps> = ({ x, y }) => {
 
   const fetchRoute = async () => {
     try {
-      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=${GOOGLE_MAPS_iOS_API_KEY}`;
+      const url =
+        "https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving";
+      const params = {
+        // start: "127.1058342,37.359708",
+        // goal: "129.075986,35.179470",
+        start: `${origin.longitude},${origin.latitude}`,
+        goal: `${destination.longitude},${destination.latitude}`,
+        option: "trafast",
+      };
 
-      console.log("Fetching route from URL:", url); // URL 로깅
+      const headers = {
+        "X-NCP-APIGW-API-KEY-ID": NAVER_API_KEY_ID,
+        "X-NCP-APIGW-API-KEY": NAVER_API_KEY,
+      };
 
-      const response = await axios.get(url);
+      const response = await axios.get(url, { params, headers });
 
-      console.log("API Response:", JSON.stringify(response.data, null, 2)); // 전체 응답 로깅
-
-      if (response.data.status !== "OK") {
-        throw new Error(`API returned status: ${response.data.status}`);
+      if (response.data.code === 0) {
+        const path = response.data.route.trafast[0].path;
+        const coordinates: Coordinate[] = path.map((point: number[]) => ({
+          latitude: point[1],
+          longitude: point[0],
+        }));
+        setRouteCoordinates(coordinates);
+      } else {
+        throw new Error(`API returned code: ${response.data.code}`);
       }
-
-      if (!response.data.routes || response.data.routes.length === 0) {
-        throw new Error("No routes found");
-      }
-
-      const route = response.data.routes[0];
-      if (!route.overview_polyline || !route.overview_polyline.points) {
-        throw new Error("No polyline found in the route");
-      }
-
-      const points = route.overview_polyline.points;
-      const decodedPoints = decodePolyline(points);
-      setRoute(decodedPoints);
     } catch (error) {
+      // alert("경로를 가져오는 데 실패했습니다. 잠시 후 다시 시도해 주세요.");
       console.error("Error fetching route:", error);
-      alert("경로를 가져오는 데 실패했습니다. 잠시 후 다시 시도해 주세요.");
     }
   };
+
+  useEffect(() => {
+    fetchRoute();
+  }, []);
 
   const calculateDelta = (origin, destination) => {
     const latDelta = Math.abs(origin.latitude - destination.latitude) + 0.1;
@@ -131,6 +107,18 @@ const MapScreen: React.FC<MapScreenProps> = ({ x, y }) => {
           longitudeDelta,
         };
 
+  const calculateCenter = (origin, destination) => {
+    return {
+      latitude: (origin.latitude + destination.latitude) / 2,
+      longitude: (origin.longitude + destination.longitude) / 2,
+    };
+  };
+
+  const center =
+    destination.latitude !== 0 && destination.longitude !== 0
+      ? calculateCenter(origin, destination)
+      : origin;
+
   return (
     <View style={styles.container}>
       <MapView style={styles.map} initialRegion={initialRegion}>
@@ -146,13 +134,18 @@ const MapScreen: React.FC<MapScreenProps> = ({ x, y }) => {
               pinColor="red"
             />
           )}
-        {route && (
+        {/* {route && (
           <Polyline
-            coordinates={route}
-            strokeWidth={4}
-            strokeColor="rgba(0, 120, 255, 0.7)"
+            coordinates={routeCoordinates}
+            strokeWidth={5}
+            strokeColor="red"
           />
-        )}
+        )} */}
+        <Polyline
+          coordinates={routeCoordinates}
+          strokeWidth={5}
+          strokeColor="red"
+        />
       </MapView>
     </View>
   );
