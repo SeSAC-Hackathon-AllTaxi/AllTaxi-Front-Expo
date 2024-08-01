@@ -4,8 +4,9 @@ import { theme } from "./theme";
 export const typography = {
   header: {
     fontFamily: theme.fonts.NotoSansKR.extraBold,
-    fontSize: 22,
+    fontSize: 30,
     lineHeight: 32,
+    fontWeight: 500,
   } as TextStyle,
   body: {
     fontFamily: theme.fonts.NotoSansKR.regular,
