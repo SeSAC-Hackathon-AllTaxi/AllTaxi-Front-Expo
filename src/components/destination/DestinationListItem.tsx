@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableWithoutFeedback } from "react-native";
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Alert } from "react-native";
 import { KAKAO_REST_API_KEY } from "@env";
 import { theme } from "constants/theme";
 import { useTheme } from "contexts/ThemeContext";
@@ -13,9 +13,10 @@ import { calculateTaxiFare } from "utils/calculateTaxiFare";
 type RootStackParamList = {
   Home: undefined;
   Chat: undefined;
-  MyLocation: undefined;
+  MyLocation: { requestId: number }; // MyLocation에 requestId 전달
   Destination: { destination: string } | undefined;
   DestinationDetail: { place: Object; onBack: () => void };
+  TaxiMatchScreen: { requestId: number };
 };
 
 interface DestinationListItemProps {
@@ -41,7 +42,6 @@ interface IAddressItem {
     address_name: string;
     region_1depth_name: string;
     region_2depth_name: string;
-    region_3depth_name: string;
     road_name: string;
     underground_yn: string;
     main_building_no: string;
@@ -53,7 +53,6 @@ interface IAddressItem {
     address_name: string;
     region_1depth_name: string;
     region_2depth_name: string;
-    region_3depth_name: string;
     mountain_yn: string;
     main_address_no: string;
     sub_address_no: string;
@@ -70,6 +69,7 @@ const DestinationListItem: React.FC<DestinationListItemProps> = ({
   const [address, setAddress] = useState<IAddress | undefined>();
   const { theme, typography } = useTheme();
   const [openModal, setOpenModal] = useState(false);
+
   const searchCoord = async () => {
     try {
       const response = await axios.get(
@@ -98,6 +98,25 @@ const DestinationListItem: React.FC<DestinationListItemProps> = ({
   const distanceInMeters = Number(place.distance);
   const isNightTime = false; // 주간 시간대
   const result = calculateTaxiFare(distanceInMeters, isNightTime);
+
+  const sendDestination = async () => {
+    try {
+      const response = await axios.post("http://3.34.131.133:8080/api/create-request", {
+        userId: 2,
+        placeName: place.place_name,
+        address: place.address_name,
+        latitude: parseFloat(place.y),
+        longitude: parseFloat(place.x),
+      });
+      console.log("Response from backend:", response.data);
+      const requestId = response.data.requestId;
+      navigation.navigate('MyLocation', { requestId });
+
+    } catch (error) {
+      console.error("Error sending destination:", error);
+      Alert.alert("Error", "Failed to send destination.");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -148,7 +167,7 @@ const DestinationListItem: React.FC<DestinationListItemProps> = ({
 
       <View style={styles.alter}>
         <TouchableWithoutFeedback
-          onPress={() => navigation.navigate("MyLocation")}
+          onPress={sendDestination}
         >
           <View style={styles.button}>
             <Text style={styles.buttonText}>여기로 출발</Text>

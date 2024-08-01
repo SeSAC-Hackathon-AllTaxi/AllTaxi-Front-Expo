@@ -235,7 +235,6 @@
 //     backgroundColor: "white",
 //   },
 // });
-
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -245,12 +244,13 @@ import {
   Image,
   Dimensions,
   Modal,
+  Alert
 } from "react-native";
 import { theme } from "constants/theme";
 import { AntDesign } from "@expo/vector-icons";
 import { typography } from "constants/typography";
-import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import { useNavigation } from "@react-navigation/native"; // Import navigation
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { useNavigation, useRoute } from "@react-navigation/native"; 
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "App";
 
@@ -263,6 +263,8 @@ export default function MyLocationScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const cameraRef = useRef<CameraView>(null);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const route = useRoute();
+  const { requestId } = route.params;
 
   useEffect(() => {
     if (permission?.status !== "granted") {
@@ -296,10 +298,6 @@ export default function MyLocationScreen() {
       setPhoto(photo.uri);
       sendPhotoToServer(photo.uri);
       setModalVisible(true);
-      setTimeout(() => {
-        setModalVisible(false);
-        // navigation.navigate("Chat"); // Navigate to the  택시 매칭 로딩 화면
-      }, 2000);
     }
   };
 
@@ -313,7 +311,7 @@ export default function MyLocationScreen() {
 
     try {
       const response = await fetch(
-        "http://3.34.131.133:8080/api/set-pickup-point/1",
+        `http://3.34.131.133:8080/api/set-pickup-point/${requestId}`,
         {
           method: "POST",
           body: formData,
@@ -326,11 +324,24 @@ export default function MyLocationScreen() {
       if (response.ok) {
         const responseData = await response.json();
         console.log("Server response:", responseData);
+        setTimeout(() => {
+          setModalVisible(false);
+          navigation.navigate("TaxiMatchScreen", {
+            requestId: requestId, // requestId 전달
+            pickupLocation: responseData.pickupLocation // pickupLocation 전달
+          });
+        }, 2000);
       } else {
         console.error("Server error:", response.status);
+        const errorData = await response.json();
+        console.error("Error details:", errorData);
+        Alert.alert("Error", `Server returned an error: ${response.status}`);
+        setModalVisible(false);
       }
     } catch (error) {
       console.error("Error sending photo:", error);
+      Alert.alert("Error", "An error occurred while sending the photo.");
+      setModalVisible(false);
     }
   };
 
@@ -464,14 +475,14 @@ const styles = StyleSheet.create({
   },
   centerRow: {
     flexDirection: "row",
-    height: WINDOW_HEIGHT * 0.4, // 상반신 프레임의 높이 조절
+    height: WINDOW_HEIGHT * 0.4, 
   },
   sideOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   centerFrame: {
-    width: WINDOW_HEIGHT * 0.4, // 상반신 프레임의 너비 조절
+    width: WINDOW_HEIGHT * 0.4, 
     borderWidth: 2,
     borderColor: "white",
     borderRadius: 10,

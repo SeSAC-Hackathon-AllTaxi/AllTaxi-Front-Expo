@@ -11,16 +11,20 @@ import DestinationDetailScreen from "screens/DestinationDetailScreen";
 import MyLocationScreen from "screens/MyLocationScreen";
 import CameraScreen from "screens/CameraScreen";
 import InitLoadingScreen from "screens/InitLoadingScreen";
+import TaxiMatchScreen from "screens/TaxiMatchScreen";
 import ChatScreenTest from "screens/ChatScreenTest";
+import MatchedScreen from "screens/MatchedScreen";
 
 export type RootStackParamList = {
   올택시: undefined;
   Booking: undefined;
-  Destination: undefined;
   Chat: undefined;
-  DestinationDetail: undefined;
-  MyLocation: undefined;
+  MyLocation: { requestId: number };
+  Destination: { destination: string } | undefined;
+  DestinationDetail: { place: Object; onBack: () => void };
   Camera: undefined;
+  TaxiMatchScreen: undefined;
+  MatchedScreen: { requestId: number , x: string, y: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -68,6 +72,8 @@ export default function App() {
           <Stack.Screen name="Chat" component={ChatScreenTest} />
           <Stack.Screen name="MyLocation" component={MyLocationScreen} />
           <Stack.Screen name="Camera" component={CameraScreen} />
+          <Stack.Screen name="TaxiMatchScreen" component={TaxiMatchScreen} />
+          <Stack.Screen name="MatchedScreen" component={MatchedScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </ThemeProvider>
