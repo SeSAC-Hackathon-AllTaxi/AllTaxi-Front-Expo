@@ -12,6 +12,9 @@ import DestinationListItem from "components/destination/DestinationListItem";
 import { useLocationStore } from "state/locationStore";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
+import { typography } from "constants/typography";
+import { AntDesign } from "@expo/vector-icons";
+import { theme } from "constants/theme";
 
 interface SelectedPlace {
   id: string;
@@ -96,6 +99,12 @@ const DestinationScreen = ({ navigation, route }: Props) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.info}>
+        <AntDesign name="sound" size={32} color="black" />
+        <Text style={[typography.header, { marginLeft: 15 }]}>
+          이 중에 어디인가요?
+        </Text>
+      </View>
       <FlatList
         data={results}
         keyExtractor={(item) => item.id}
@@ -115,7 +124,7 @@ const DestinationScreen = ({ navigation, route }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: theme.colors.background,
   },
   input: {
     height: 40,
@@ -124,8 +133,25 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
   },
+  info: {
+    paddingTop: 80,
+    height: 160,
+    backgroundColor: theme.colors.background,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderBottomEndRadius: 30,
+    borderBottomStartRadius: 30,
+    zIndex: 1,
+    display: "flex",
+    flexDirection: "row",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
   item: {
     marginVertical: 10,
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 16,
