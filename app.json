@@ -1,6 +1,5 @@
 {
   "expo": {
-    "sdkVersion": "51.0.22",
     "name": "AllTaxi",
     "slug": "AllTaxi",
     "version": "1.0.0",
@@ -13,6 +12,7 @@
       "backgroundColor": "#ffffff"
     },
     "updates": {
+      "enabled": true,
       "fallbackToCacheTimeout": 0
     },
     "assetBundlePatterns": ["**/*"],
@@ -79,15 +79,6 @@
       ]
     },
     "web": {},
-    "plugins": [
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "올택시가 카메라에 접근하도록 허용하시겠습니까?"
-        }
-      ],
-      "expo-location",
-      "expo-dev-client"
-    ]
+    "plugins": ["expo-location", "expo-dev-client"]
   }
 }
