@@ -21,7 +21,7 @@ type Props = {
   navigation: CameraScreenNavigationProp;
 };
 
-export default function CameraScreen({ navigation }: Props) {
+export default function CameraScreen() {
   const { theme, typography } = useTheme();
   const [image, setImage] = useState<string | null>(null);
 
@@ -37,6 +37,7 @@ export default function CameraScreen({ navigation }: Props) {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      cameraType: ImagePicker.CameraType.front, // 전면 카메라로 제한
     });
 
     if (!result.canceled) {
@@ -46,17 +47,10 @@ export default function CameraScreen({ navigation }: Props) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.info}>
-        <Text style={[typography.header]}>
-          <AntDesign name="sound" size={24} color="black" />
-          지금 계신 위치를 찍어주세요
-        </Text>
-      </View>
-
       {image && <Image source={{ uri: image }} style={styles.image} />}
 
       <TouchableOpacity style={styles.button} onPress={takePhoto}>
-        <Text style={styles.buttonText}>사진 촬영</Text>
+        <Text style={styles.buttonText}>사진 촬영 (전면 카메라)</Text>
       </TouchableOpacity>
     </View>
   );
